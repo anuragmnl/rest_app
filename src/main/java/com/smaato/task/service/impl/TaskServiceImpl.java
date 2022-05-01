@@ -1,5 +1,7 @@
 package com.smaato.task.service.impl;
 
+import static com.smaato.task.constant.TaskConstant.TIME_KEY;
+
 import com.smaato.task.exception.TaskException;
 import com.smaato.task.service.TaskService;
 import java.time.LocalTime;
@@ -25,6 +27,11 @@ public class TaskServiceImpl implements TaskService {
     requests.compute(time, (key, value) -> value == null ? new CopyOnWriteArraySet<>(Collections.singleton(id)) : add(value,id));
   }
 
+  @Override
+  public int count(String hourmin) {
+    return requests.get(hourmin)==null?0:requests.get(hourmin).size();
+  }
+
   private Set<Long> add(Set<Long> value, Long id) {
    boolean flag =  value.add(id);
    if(!flag)
@@ -36,8 +43,8 @@ public class TaskServiceImpl implements TaskService {
 
   @Scheduled(fixedDelay = 60000)
   void logDetails(){
-    String presentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
-    String oneMinEarlier = LocalTime.now().minusMinutes(1).format(DateTimeFormatter.ofPattern("HH:mm"));
+    String presentTime = LocalTime.now().format(DateTimeFormatter.ofPattern(TIME_KEY));
+    String oneMinEarlier = LocalTime.now().minusMinutes(1).format(DateTimeFormatter.ofPattern(TIME_KEY));
     log.info("Present time [{}] and one min earlier time [{}]",presentTime,oneMinEarlier);
     if(requests.containsKey(oneMinEarlier)){
       log.info("Will remove [{}] for key [{}] details of entries  [{}] ",requests.get(oneMinEarlier).size(),oneMinEarlier,requests.get(oneMinEarlier));

@@ -1,14 +1,21 @@
 package com.smaato.task.util;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.commons.validator.routines.UrlValidator;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TaskUtil {
 
-  public static boolean validateUri(String uri) {
-    UrlValidator defaultValidator = new UrlValidator();
-      return defaultValidator.isValid(uri);
+  public static boolean isUrlValid(String url) {
+    try {
+      URL obj = new URL(url);
+      obj.toURI();
+      return true;
+    } catch ( MalformedURLException | URISyntaxException e) {
+      return false;
+    }
   }
 }

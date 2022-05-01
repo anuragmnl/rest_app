@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.Builder;
 import reactor.netty.http.client.HttpClient;
 
 @Configuration
@@ -19,13 +18,9 @@ import reactor.netty.http.client.HttpClient;
 public class TaskConfig {
 
   @Bean
-  public Builder webClientBuilder(){
+  public WebClient webClient(WebClient.Builder builder){
     HttpClient httpClient = HttpClient.create().responseTimeout(Duration.ofMillis(500));
-
-    return WebClient.builder()
-        .clientConnector(new ReactorClientHttpConnector(httpClient));
-
-
+    return builder.clientConnector(new ReactorClientHttpConnector(httpClient)).build();
   }
 
   @Bean
