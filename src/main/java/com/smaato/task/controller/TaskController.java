@@ -12,13 +12,16 @@ import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
 @RestController
 @RequestMapping("/api/smaato")
@@ -28,12 +31,15 @@ public class TaskController {
 
     private final UriRestClient uriRestClient;
     private final TaskService service;
+    Sinks.Many<Long> requestIdSink = Sinks.many().replay().all();
 
-    @GetMapping("/accept")
+
+  @GetMapping("/accept")
     @ResponseStatus(HttpStatus.OK)
     public Mono<String> accept(@RequestParam Long id,@RequestParam(required = false) String uri) throws TaskException {
           log.info("Recieved new request with param id= [{}],uri = [{}] ",id,uri);
           service.persist(id, LocalTime.now().format(DateTimeFormatter.ofPattern(TIME_KEY)));
+          requestIdSink.tryEmitNext(id);
           if( uri != null && !uri.isBlank() && !uri.isEmpty() ){
               if(!TaskUtil.isUrlValid(uri)){
                 throw new TaskException("Invalid uri");
@@ -48,6 +54,11 @@ public class TaskController {
   public Mono<String> count(@RequestParam Long count) throws TaskException {
     log.info("Recieved new request with param count= [{}] ",count);
     return Mono.just(OK);
+  }
+
+  @GetMapping(value = "/stream",produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  public Flux<Long> getMoviesById(){
+    return requestIdSink.asFlux();
   }
 
 }
