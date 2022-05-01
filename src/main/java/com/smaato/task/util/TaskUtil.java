@@ -9,6 +9,6 @@ public class TaskUtil {
 
   public static boolean validateUri(String uri) {
     UrlValidator defaultValidator = new UrlValidator();
-      return uri != null && !uri.isBlank() && !uri.isEmpty() && defaultValidator.isValid(uri);
+      return defaultValidator.isValid(uri);
   }
 }

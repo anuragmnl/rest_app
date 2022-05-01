@@ -1,8 +1,9 @@
 package com.smaato.task.config;
 
 import java.time.Duration;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,8 +29,8 @@ public class TaskConfig {
   }
 
   @Bean
-  public Set<Long> requests(){
-     return new CopyOnWriteArraySet<>();
+  public Map<String, List<Long>> requestMap(){
+     return new ConcurrentHashMap<>();
   }
 
 }

@@ -4,6 +4,8 @@ import com.smaato.task.exception.TaskException;
 import com.smaato.task.rest.client.UriRestClient;
 import com.smaato.task.service.TaskService;
 import com.smaato.task.util.TaskUtil;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,14 +28,14 @@ public class TaskController {
     @GetMapping("/accept")
     @ResponseStatus(HttpStatus.OK)
     public Mono<String> accept(@RequestParam Long id,@RequestParam(required = false) String uri) throws TaskException {
-
-          service.persist(id);
-
-          if(!TaskUtil.validateUri(uri)){
-            throw new TaskException("Invalid uri");
+          log.info("Recieved new request with param id= [{}],uri = [{}] ",id,uri);
+          service.persist(id, LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+          if( uri != null && !uri.isBlank() && !uri.isEmpty() ){
+              if(!TaskUtil.validateUri(uri)){
+                throw new TaskException("Invalid uri");
+              }
+            uriRestClient.callEndPoint(uri);
           }
-
-          uriRestClient.callEndPoint(uri);
           return Mono.just("ok");
     }
 

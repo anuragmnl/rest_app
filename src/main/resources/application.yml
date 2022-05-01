@@ -5,4 +5,4 @@ spring:
     name: smaato-rest-service
 logging:
   level:
-    root: debug
+    root: info
