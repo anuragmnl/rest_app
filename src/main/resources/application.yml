@@ -6,3 +6,9 @@ spring:
 logging:
   level:
     root: info
+smaato:
+  application:
+    single-instance: true
+    redis:
+      hostname: localhost
+      port:   6379
