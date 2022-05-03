@@ -28,8 +28,8 @@ kafka-config:
   num-of-partitions: 3
   replication-factor: 3
 kafka-producer-config:
-  key-serialization-class: org.apache.kafka.serialization.StringSerializer
-  value-serialization-class: org.apache.kafka.serialization.LongSerializer
+  key-serialization-class: org.apache.kafka.common.serialization.StringSerializer
+  value-serialization-class: org.apache.kafka.common.serialization.LongSerializer
   compression-type: snappy
   acks: all
   batch-size: 16384

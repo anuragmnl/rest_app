@@ -67,7 +67,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<image>
-						<name>${project.groupId}/smaato.rest.task.service:${project.version}</name>
+						<name>smaato.rest.task.service:latest</name>
 					</image>
 					<excludes>
 						<exclude>

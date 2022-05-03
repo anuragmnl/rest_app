@@ -81,11 +81,16 @@ public class TaskServiceImpl implements TaskService {
     String presentTime = LocalTime.now().format(DateTimeFormatter.ofPattern(TIME_KEY));
     String oneMinEarlier = LocalTime.now().minusMinutes(1).format(DateTimeFormatter.ofPattern(TIME_KEY));
     log.info("Present time [{}] and one min earlier time [{}]",presentTime,oneMinEarlier);
-    if(redisRepository.containsKey(oneMinEarlier)){
+    if(!singleInstance && redisRepository.containsKey(oneMinEarlier)){
       log.info("Will remove [{}] for key [{}] details of entries  [{}] ",redisRepository.getSize(oneMinEarlier),oneMinEarlier,redisRepository.get(oneMinEarlier));
       kafkaProducerService.send(topicName,"COUNT",redisRepository.getSize(oneMinEarlier));
       boolean flag =redisRepository.remove(oneMinEarlier);
       log.info("Key [{}] removed [{}]",oneMinEarlier,flag?"successfully":"unsuccessflly");
+    }else if (singleInstance && requests.containsKey(oneMinEarlier)){
+      log.info("Will remove [{}] for key [{}] details of entries  [{}] ",requests.get(oneMinEarlier).size(),oneMinEarlier,requests.get(oneMinEarlier));
+      kafkaProducerService.send(topicName,"COUNT",(long)requests.get(oneMinEarlier).size());
+      Set<Long> flag =requests.remove(oneMinEarlier);
+      log.info("Key [{}] removed [{}]",oneMinEarlier,!flag.isEmpty()?"successfully":"unsuccessflly");
     }else {
       log.info("No data present for key [{}]",oneMinEarlier);
     }
