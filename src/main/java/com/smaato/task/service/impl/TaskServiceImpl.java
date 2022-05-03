@@ -4,6 +4,7 @@ import static com.smaato.task.constant.TaskConstant.TIME_KEY;
 
 import com.smaato.task.exception.TaskException;
 import com.smaato.task.repository.RedisRepository;
+import com.smaato.task.service.KafkaProducerService;
 import com.smaato.task.service.TaskService;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -24,9 +25,13 @@ public class TaskServiceImpl implements TaskService {
 
   private final Map<String, Set<Long>> requests;
   private final RedisRepository redisRepository;
+  private final KafkaProducerService<String,Long> kafkaProducerService;
 
   @Value("${smaato.application.single-instance}")
   private boolean singleInstance;
+
+  @Value("${kafka-config.topic-name}")
+  private String topicName;
 
 
   @Override
@@ -78,6 +83,7 @@ public class TaskServiceImpl implements TaskService {
     log.info("Present time [{}] and one min earlier time [{}]",presentTime,oneMinEarlier);
     if(redisRepository.containsKey(oneMinEarlier)){
       log.info("Will remove [{}] for key [{}] details of entries  [{}] ",redisRepository.getSize(oneMinEarlier),oneMinEarlier,redisRepository.get(oneMinEarlier));
+      kafkaProducerService.send(topicName,"COUNT",redisRepository.getSize(oneMinEarlier));
       boolean flag =redisRepository.remove(oneMinEarlier);
       log.info("Key [{}] removed [{}]",oneMinEarlier,flag?"successfully":"unsuccessflly");
     }else {

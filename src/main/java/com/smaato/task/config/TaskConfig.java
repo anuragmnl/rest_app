@@ -3,11 +3,13 @@ package com.smaato.task.config;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -23,6 +25,8 @@ import reactor.netty.http.client.HttpClient;
 @EnableWebFlux
 @EnableRedisRepositories
 @Slf4j
+@Import({RetryConfigData.class,KafkaConfigData.class,KafkaProducerConfigData.class
+, KafkaAdminConfig.class,KafkaProducerConfig.class,RetryConfig.class})
 public class TaskConfig {
 
   @Value("${smaato.application.redis.hostname}")
@@ -50,8 +54,8 @@ public class TaskConfig {
   }
 
   @Bean
-  public RedisTemplate<String, Object> redisTemplate() {
-    final RedisTemplate<String, Object> template = new RedisTemplate<>();
+  public RedisTemplate<String, Set<Long>> redisTemplate() {
+    final RedisTemplate<String, Set<Long>> template = new RedisTemplate<>();
     template.setConnectionFactory(lettuceConnectionFactory());
     template.setValueSerializer(new GenericToStringSerializer<>(Object.class));
     template.afterPropertiesSet();
