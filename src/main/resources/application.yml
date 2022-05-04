@@ -8,10 +8,12 @@ logging:
     root: info
 smaato:
   application:
-    single-instance: true
     redis:
+      required: false
       hostname: localhost
       port:   6379
+    kafka:
+      required: true
 retry-config:
   initial-interval-ms: 1000
   max-interval-ms: 10000

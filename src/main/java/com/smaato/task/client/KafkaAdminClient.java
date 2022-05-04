@@ -13,6 +13,7 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.CreateTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.admin.TopicListing;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.retry.RetryContext;
@@ -24,6 +25,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(name = "smaato.application.kafka.required",matchIfMissing = false,havingValue = "true")
 public class KafkaAdminClient {
 
   private final KafkaConfigData kafkaConfigData;
@@ -34,7 +36,7 @@ public class KafkaAdminClient {
 
   public void createTopic() {
     try {
-      CreateTopicsResult createTopicsResult = retryTemplate.execute(this::doCreateTopic);
+          retryTemplate.execute(this::doCreateTopic);
     } catch (Exception t) {
       throw new KafkaClientException("Maximum no of retries for creating kaka template reached ",
           t);

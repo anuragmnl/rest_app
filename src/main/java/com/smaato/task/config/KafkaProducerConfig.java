@@ -1,11 +1,13 @@
 package com.smaato.task.config;
 
+import com.smaato.task.config.condition.KafkaCondition;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -13,6 +15,7 @@ import org.springframework.kafka.core.ProducerFactory;
 
 @Configuration
 @RequiredArgsConstructor
+@Conditional(KafkaCondition.class)
 public class KafkaProducerConfig<K extends Serializable,V extends Serializable>{
 
   private final KafkaConfigData kafkaConfigData;

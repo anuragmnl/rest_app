@@ -1,10 +1,12 @@
 package com.smaato.task.repository.impl;
 
+import com.smaato.task.config.condition.RedisCondition;
 import com.smaato.task.repository.RedisRepository;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 @Slf4j
 @Repository
+@Conditional(RedisCondition.class)
 public class RedisRepositoryImpl implements RedisRepository {
 
   private static final String REDIS_KEY =  "REQUEST_IDS";
@@ -22,7 +25,8 @@ public class RedisRepositoryImpl implements RedisRepository {
 
   @PostConstruct
   private void init(){
-    hashOperations = redisTemplate.opsForHash();
+    if(redisTemplate != null)
+      hashOperations = redisTemplate.opsForHash();
   }
 
   @Override

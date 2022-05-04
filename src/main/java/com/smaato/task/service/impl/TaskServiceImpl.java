@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -24,11 +25,12 @@ import org.springframework.stereotype.Service;
 public class TaskServiceImpl implements TaskService {
 
   private final Map<String, Set<Long>> requests;
-  private final RedisRepository redisRepository;
-  private final KafkaProducerService<String,Long> kafkaProducerService;
 
-  @Value("${smaato.application.single-instance}")
-  private boolean singleInstance;
+  @Autowired(required = false)
+  private KafkaProducerService<String, Long> kafkaProducerService;
+
+  @Autowired(required = false)
+  private RedisRepository redisRepository;
 
   @Value("${kafka-config.topic-name}")
   private String topicName;
@@ -36,7 +38,7 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   public void persist(Long id, String time) {
-    if(!singleInstance) {
+    if (null != redisRepository) {
       Set<Long> set = redisRepository.get(time);
       if (null != set) {
         if (set.add(id)) {
@@ -47,7 +49,7 @@ public class TaskServiceImpl implements TaskService {
       } else {
         redisRepository.add(time, new CopyOnWriteArraySet<>(Collections.singleton(id)));
       }
-    }else {
+    } else {
       requests.compute(time,
           (key, value) -> value == null ? new CopyOnWriteArraySet<>(Collections.singleton(id))
               : add(value, id));
@@ -56,7 +58,7 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   public int count(String hourmin) {
-    return singleInstance? getFromLocalCache(hourmin) : getFromExternalCache(hourmin);
+    return null == redisRepository ? getFromLocalCache(hourmin) : getFromExternalCache(hourmin);
   }
 
   private int getFromExternalCache(String hourmin) {
@@ -68,31 +70,45 @@ public class TaskServiceImpl implements TaskService {
   }
 
   private Set<Long> add(Set<Long> value, Long id) {
-   boolean flag =  value.add(id);
-   if(!flag)
-     throw new TaskException(" Duplicate request id "+ id);
+    boolean flag = value.add(id);
+    if (!flag) {
+      throw new TaskException(" Duplicate request id " + id);
+    }
 
-   return value;
+    return value;
   }
 
 
   @Scheduled(fixedDelay = 60000)
-  void logDetails(){
+  void logDetails() {
     String presentTime = LocalTime.now().format(DateTimeFormatter.ofPattern(TIME_KEY));
-    String oneMinEarlier = LocalTime.now().minusMinutes(1).format(DateTimeFormatter.ofPattern(TIME_KEY));
-    log.info("Present time [{}] and one min earlier time [{}]",presentTime,oneMinEarlier);
-    if(!singleInstance && redisRepository.containsKey(oneMinEarlier)){
-      log.info("Will remove [{}] for key [{}] details of entries  [{}] ",redisRepository.getSize(oneMinEarlier),oneMinEarlier,redisRepository.get(oneMinEarlier));
-      kafkaProducerService.send(topicName,"COUNT",redisRepository.getSize(oneMinEarlier));
-      boolean flag =redisRepository.remove(oneMinEarlier);
-      log.info("Key [{}] removed [{}]",oneMinEarlier,flag?"successfully":"unsuccessflly");
-    }else if (singleInstance && requests.containsKey(oneMinEarlier)){
-      log.info("Will remove [{}] for key [{}] details of entries  [{}] ",requests.get(oneMinEarlier).size(),oneMinEarlier,requests.get(oneMinEarlier));
-      kafkaProducerService.send(topicName,"COUNT",(long)requests.get(oneMinEarlier).size());
-      Set<Long> flag =requests.remove(oneMinEarlier);
-      log.info("Key [{}] removed [{}]",oneMinEarlier,!flag.isEmpty()?"successfully":"unsuccessflly");
-    }else {
-      log.info("No data present for key [{}]",oneMinEarlier);
+    String oneMinEarlier = LocalTime.now().minusMinutes(1)
+                                   .format(DateTimeFormatter.ofPattern(TIME_KEY));
+    log.debug("Present time [{}] and one min earlier time [{}]", presentTime, oneMinEarlier);
+
+    if (redisRepository != null && redisRepository.containsKey(oneMinEarlier)) {
+      log.info("Count of requestId's recieved is [{}] in interval time [{}] and [{}] from distributed cache",
+          redisRepository.getSize(oneMinEarlier), oneMinEarlier,presentTime);
+      pushToKafka(redisRepository.getSize(oneMinEarlier));
+      boolean flag = redisRepository.remove(oneMinEarlier);
+      log.debug("Key [{}] removed [{}]", oneMinEarlier, flag ? "successfully" : "unsuccessflly");
+    } else if (requests.containsKey(oneMinEarlier)) {
+      log.info("Count of requestId's recieved is [{}] in interval time [{}] and [{}] from  standalone cache",
+          requests.get(oneMinEarlier).size(), oneMinEarlier, presentTime);
+      pushToKafka((long) requests.get(oneMinEarlier).size());
+      Set<Long> flag = requests.remove(oneMinEarlier);
+      log.debug("Key [{}] removed [{}]", oneMinEarlier,
+          !flag.isEmpty() ? "successfully" : "unsuccessflly");
+    } else {
+      log.info("No data present for key [{}]", oneMinEarlier);
+    }
+  }
+
+  private void pushToKafka(Long count) {
+    if (kafkaProducerService != null) {
+      kafkaProducerService.send(topicName, "COUNT", count);
+    } else {
+      log.info("Kafka not available");
     }
   }
 }

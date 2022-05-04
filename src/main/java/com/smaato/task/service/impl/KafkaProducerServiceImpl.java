@@ -1,11 +1,13 @@
 package com.smaato.task.service.impl;
 
 
+import com.smaato.task.config.condition.KafkaCondition;
 import com.smaato.task.service.KafkaProducerService;
 import javax.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Conditional(KafkaCondition.class)
 public class KafkaProducerServiceImpl implements KafkaProducerService<String, Long> {
 
   private final KafkaTemplate<String, Long> kafkaTemplate;
