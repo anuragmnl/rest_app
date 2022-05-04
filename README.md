@@ -87,9 +87,9 @@ Result should be following
 | `jar` |smaato-rest-task.jar|
 | `image` | smaato.rest.task.service:latest|
 
-Once done you can run following command
+Once done you can run following command to start everything on docker
 
-`docker-compose -f common.yml -f kafka_cluster.yml -f redis.yml -f service.yml up -d`
+`docker-compose -f .\common.yml -f .\kafka_cluster.yml -f .\redis.yml  -f .\services-8878.yml -f .\services-8879.yml up -d`
 
 **Please note the application can also be build with redis and kafka required flag as false in case redis and kafka not present**
 
@@ -104,7 +104,7 @@ Once done you can run following command
 To deploy this project run
 
 ```bash
-  `docker-compose -f common.yml -f kafka_cluster.yml -f redis.yml -f service.yml up -d`
+  `docker-compose -f .\common.yml -f .\kafka_cluster.yml -f .\redis.yml -f .\services-8878.yml -f .\services-8879.yml up -d`
 ```
 
 

@@ -1,0 +1,22 @@
+version: '3.7'
+services:
+  smaato-rest-task-service-1:
+    restart: on-failure
+    image: smaato.rest.task.service:latest
+    ports:
+      - 8878:8878
+    volumes:
+      - "./docker-logs:/workspace/stream-to-kafka-service/logs"
+    environment:
+      - "LOGGING_LEVEL_COM_SMAATO_TASK=info"
+      - "LOGGING_LEVEL_ROOT=info"
+      - "KAFKA-CONFIG_TOPIC-NAME=requestId-topic"
+      - "KAFKA-CONFIG_BOOTSTRAP-SERVERS=kafka-broker-1:9092, kafka-broker-2:9092, kafka-broker-3:9092"
+      - "KAFKA-CONFIG_SCHEMA-REGISTRY-URL=http://schema-registry:8081"
+      - "SMAATO_APPLICATION_REDIS_HOSTNAME=redis"
+      - "SMAATO_APPLICATION_REDIS_PORT=6379"
+      - "SMAATO_APPLICATION_REDIS_REQUIRED=true"
+      - "SMAATO_APPLICATION_KAFKA_REQUIRED=true"
+      - "SERVER_PORT=8878"
+    networks:
+        - ${GLOBAL_NETWORK:-services}

@@ -1,10 +1,10 @@
 version: '3.7'
 services:
-  smaato-rest-task-service:
+  smaato-rest-task-service-2:
     restart: on-failure
     image: smaato.rest.task.service:latest
     ports:
-      - 8878-8879:80
+      - 8879:8879
     volumes:
       - "./docker-logs:/workspace/stream-to-kafka-service/logs"
     environment:
@@ -17,5 +17,6 @@ services:
       - "SMAATO_APPLICATION_REDIS_PORT=6379"
       - "SMAATO_APPLICATION_REDIS_REQUIRED=true"
       - "SMAATO_APPLICATION_KAFKA_REQUIRED=true"
+      - "SERVER_PORT=8879"
     networks:
         - ${GLOBAL_NETWORK:-services}
