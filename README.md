@@ -91,7 +91,7 @@ Once done you can run following command
 
 `docker-compose -f common.yml -f kafka_cluster.yml -f redis.yml -f service.yml up -d`
 
-**Please note the application can also be build with redis and kafka required flag as false**
+**Please note the application can also be build with redis and kafka required flag as false in case redis and kafka not present**
 
 
 
