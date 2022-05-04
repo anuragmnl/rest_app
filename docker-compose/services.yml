@@ -1,20 +1,10 @@
 version: '3.7'
 services:
-  redis:
-    image: redis:alpine
-    ports:
-      - 6379:6379
-    volumes:
-      - $PWD/redis-data:/var/lib/redis
-      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
-    environment:
-      - REDIS_REPLICATION_MODE=master
-      - ALLOW_EMPTY_PASSWORD=yes
   smaato-rest-task-service:
+    restart: on-failure
     image: smaato.rest.task.service:latest
     ports:
-      - "8878:8878"
-      - "8879:8879"
+      - 8878-8879:80
     volumes:
       - "./docker-logs:/workspace/stream-to-kafka-service/logs"
     environment:
@@ -23,7 +13,9 @@ services:
       - "KAFKA-CONFIG_TOPIC-NAME=requestId-topic"
       - "KAFKA-CONFIG_BOOTSTRAP-SERVERS=kafka-broker-1:9092, kafka-broker-2:9092, kafka-broker-3:9092"
       - "KAFKA-CONFIG_SCHEMA-REGISTRY-URL=http://schema-registry:8081"
-      - "SMAATO_APPLICATION_REDIS_HOSTNAME=172.28.1.4"
+      - "SMAATO_APPLICATION_REDIS_HOSTNAME=redis"
       - "SMAATO_APPLICATION_REDIS_PORT=6379"
+      - "SMAATO_APPLICATION_REDIS_REQUIRED=true"
+      - "SMAATO_APPLICATION_KAFKA_REQUIRED=true"
     networks:
         - ${GLOBAL_NETWORK:-services}
