@@ -13,7 +13,7 @@ smaato:
       hostname: localhost
       port:   6379
     kafka:
-      required: true
+      required: false
 retry-config:
   initial-interval-ms: 1000
   max-interval-ms: 10000
