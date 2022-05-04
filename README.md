@@ -115,6 +115,10 @@ You can also run the application by below command. By default it will run on por
 if you want to run on any other port you can run following command
 
 `java -jar smaato-rest-task.jar -Dserver.port=<desired port>`
+
+![smaato](https://user-images.githubusercontent.com/104711321/166808738-f6ea1bff-8b8f-4cff-a6ef-bbc4d5663048.png)
+
+
 ## 🚀 Git hub
 
 `https://github.com/anuragmnl/rest_app`
