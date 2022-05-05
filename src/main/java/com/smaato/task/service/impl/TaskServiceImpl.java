@@ -80,7 +80,7 @@ public class TaskServiceImpl implements TaskService {
 
 
   @Scheduled(fixedDelay = 60000)
-  void logDetails() {
+  synchronized void logDetails() {
     String presentTime = LocalTime.now().format(DateTimeFormatter.ofPattern(TIME_KEY));
     String oneMinEarlier = LocalTime.now().minusMinutes(1)
                                    .format(DateTimeFormatter.ofPattern(TIME_KEY));
